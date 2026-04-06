@@ -28,10 +28,10 @@ app.post("/generate-id", async (req, res) => {
     }
 
     // ✅ Launch Puppeteer (IMPORTANT for Render)
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
+   const browser = await puppeteer.launch({
+  headless: true,
+  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+});
 
     const page = await browser.newPage();
 
