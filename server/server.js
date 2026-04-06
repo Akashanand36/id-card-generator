@@ -11,8 +11,9 @@ app.use(express.json());
 
 // ✅ Root route (to avoid "Cannot GET /")
 app.get("/", (req, res) => {
-  res.send("🚀 ID Card Backend Running");
+  res.send("✅ ID Card Backend is Running");
 });
+
 
 // ✅ Generate ID API
 app.post("/generate-id", async (req, res) => {
