@@ -1,15 +1,13 @@
 const { Resend } = require("resend");
 
-// ✅ Use environment variable (DON’T hardcode API key)
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 exports.sendEmail = async (to, imageBuffer) => {
   try {
-    // ✅ Convert image buffer → base64
     const base64Image = imageBuffer.toString("base64");
 
     const response = await resend.emails.send({
-      from: "akashanand3615@gmail.com", // change after domain verify
+      from: "onboarding@resend.dev", // ✅ MUST use this
       to: to,
       subject: "Your ID Card",
       html: `
