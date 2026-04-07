@@ -8,7 +8,7 @@ exports.sendEmail = async (to, imageBuffer) => {
 
     const response = await resend.emails.send({
       from: "onboarding@resend.dev", // ✅ MUST use this
-      to: to,
+      to: "akashanand3615@gmail.com",
       subject: "Your ID Card",
       html: `
         <div style="font-family: Arial; text-align: center;">
