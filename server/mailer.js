@@ -1,33 +1,45 @@
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-exports.sendEmail = async (to, imageBuffer) => {
+const sendEmail = async (to, imageBuffer) => {
   try {
-    const base64Image = imageBuffer.toString("base64");
+    console.log("📧 Sending email to:", to);
 
-    const response = await resend.emails.send({
-      from: "onboarding@resend.dev", // ✅ MUST use this
-      to: "akashanand3615@gmail.com",
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"NRS ID Card" <${process.env.EMAIL_USER}>`,
+      to: to,
       subject: "Your ID Card",
       html: `
-        <div style="font-family: Arial; text-align: center;">
+        <div style="text-align:center;font-family:Arial">
           <h2>Your ID Card</h2>
-          <p>Please find your ID card attached below.</p>
+          <p>Please find your ID card attached.</p>
         </div>
       `,
       attachments: [
         {
           filename: "id-card.png",
-          content: base64Image
+          content: imageBuffer
         }
       ]
-    });
+    };
 
-    console.log("✅ Email sent:", response);
+    const response = await transporter.sendMail(mailOptions);
+
+    console.log("✅ Email sent:", response.messageId);
+
+    return response;
 
   } catch (error) {
-    console.error("❌ Email error:", error);
+    console.error("❌ Email error:", error.message);
     throw error;
   }
 };
+
+module.exports = { sendEmail };

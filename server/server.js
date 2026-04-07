@@ -4,7 +4,7 @@ const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
 
 const { generateHTML } = require("./template");
-// const { sendEmail } = require("./mailer"); // enable later
+ const { sendEmail } = require("./mailer"); 
 
 const app = express();
 
