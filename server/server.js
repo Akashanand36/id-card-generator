@@ -4,7 +4,7 @@ const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
 
 const { generateHTML } = require("./template");
-const { sendEmail } = require("./mailer");
+// const { sendEmail } = require("./mailer"); // enable later
 
 const app = express();
 
@@ -13,23 +13,27 @@ app.use(express.json());
 
 // ✅ Root route
 app.get("/", (req, res) => {
-  res.send("✅ ID Card Backend is Running");
+  res.send("✅ Server Running");
 });
 
-// ✅ Generate ID API
+// ✅ Fix: allow browser + POST testing
+app.get("/generate-id", (req, res) => {
+  res.send("⚠️ Use POST request to generate ID");
+});
+
+// ✅ Main API
 app.post("/generate-id", async (req, res) => {
   let browser;
 
   try {
     const data = req.body;
-    console.log("📥 Incoming Data:", data);
+    console.log("📥 Data:", data);
 
-    // ✅ Fix Google Drive image URL
+    // Fix Google Drive image
     if (data.photo && data.photo.includes("drive")) {
       data.photo = data.photo.replace("open?id=", "uc?export=view&id=");
     }
 
-    // ✅ Launch Puppeteer (Render compatible)
     browser = await puppeteer.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
@@ -37,59 +41,36 @@ app.post("/generate-id", async (req, res) => {
     });
 
     const page = await browser.newPage();
-
-    // ✅ Set size (ID Card ratio)
     await page.setViewport({ width: 400, height: 600 });
 
-    // ✅ Generate HTML
     const html = generateHTML(data);
 
     await page.setContent(html, {
       waitUntil: "networkidle0"
     });
 
-    // ✅ Take screenshot
-    const imageBuffer = await page.screenshot({
-      type: "png"
-    });
+    const imageBuffer = await page.screenshot({ type: "png" });
 
-    // ✅ OPTION 1: Send Email (uncomment after testing)
-    // await sendEmail(data.email, imageBuffer);
-
-    // ✅ OPTION 2: Return Image directly (BEST FOR TESTING)
-    res.set({
-      "Content-Type": "image/png"
-    });
-
+    // ✅ OPTION A: Return image (best for testing)
+    res.set({ "Content-Type": "image/png" });
     return res.send(imageBuffer);
 
-    // ✅ OPTION 3 (alternative JSON response)
-    /*
-    return res.json({
-      success: true,
-      message: "✅ ID Card Generated Successfully"
-    });
-    */
+    // ✅ OPTION B: Send email (enable later)
+    // await sendEmail(data.email, imageBuffer);
+    // return res.json({ success: true });
 
-  } catch (error) {
-    console.error("❌ FULL ERROR:", error);
-
+  } catch (err) {
+    console.error("❌ Error:", err);
     return res.status(500).json({
       success: false,
-      message: "❌ Error generating ID Card",
-      error: error.message
+      message: "Error generating ID",
+      error: err.message
     });
-
   } finally {
-    if (browser) {
-      await browser.close();
-    }
+    if (browser) await browser.close();
   }
 });
 
-// ✅ Port (Render requirement)
+// ✅ Port
 const PORT = process.env.PORT || 10000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Running on ${PORT}`));
